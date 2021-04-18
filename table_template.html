@@ -5,9 +5,11 @@
     <h1>{{ station }}</h1>
     <table>
         <tr>
-            {% for column in df.columns %}
-            <th>{{ column }}</th>
-            {% endfor %}
+            <th>Month</th>
+            <th>Min</th>
+            <th>Max</th>
+            <th>Mean</th>
+            <th>Std</th>
         </tr>
         {% for idx, row in df.iterrows() %}
         <tr>

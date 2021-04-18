@@ -238,24 +238,30 @@ def preview_report(rep_type, data_frames, stations,  year):
 
 def main():
     global user_settings
-    st.sidebar.markdown("### 🤖 pdf Generator")
+    st.sidebar.markdown("### 🌍 PGMN water levels")
     data_folder = "./test_data/"
     data_frames, ok = get_data(data_folder, ",")
     
     if ok:     
         all_stations = st.sidebar.checkbox('All stations')
         if all_stations:
-            stations = list(data_frames.keys())
+            default = list(data_frames.keys())
+            stations = st.sidebar.multiselect("Station", list(data_frames.keys()), default)
         else:
-            stations = st.sidebar.multiselect("Station", list(data_frames.keys()))
+            lst = list(data_frames.keys())
+            default = [lst[0]]
+            stations = st.sidebar.multiselect("Station", list(data_frames.keys()), default)
         report_type = st.sidebar.selectbox("Report type",['Monthly','Yearly'])
         if report_type == 'Monthly':
             year = st.sidebar.selectbox("Year", range(2001,2021))
+        
+        # report settings
         user_settings['report_title'] = f"PGMN water levels - {year}"
-        if st.sidebar.button("Preview"):
+        
+        col1, col2 = st.sidebar.beta_columns((1,2.8))
+        if col1.button("Preview"):
             preview_report(report_type, data_frames, stations, year)
-
-        if st.sidebar.button("Generate Report"):            
+        if col2.button("Generate Report"):            
             generate_report(report_type, data_frames, stations, year)            
 
 
