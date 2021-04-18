@@ -1,0 +1,24 @@
+<head>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+</head>
+<body>
+    <h1>{{ station }}</h1>
+    <table>
+        <tr>
+            {% for column in df.columns %}
+            <th>{{ column }}</th>
+            {% endfor %}
+        </tr>
+        {% for idx, row in df.iterrows() %}
+        <tr>
+            {% for colname in df.columns %}
+                {% if colname == ('month','') %}
+                    <td>{{ row[colname]}}</td>
+                {% else %}
+                    <td>{{ row[colname] | round(2) }}</td>
+                {% endif %}                
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+</body>
