@@ -207,7 +207,8 @@ def generate_report(report_type, data_frames, stations, year):
     _create_html_file()
     st.info('generating pdf file')
     _create_pdf_files()
-
+    st.success('Done')
+    
     base64_pdf = get_base64_encoded_image(PDF_TARGET_FILE)
     pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf">' 
     st.markdown(pdf_display, unsafe_allow_html=True)
