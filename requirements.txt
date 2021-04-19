@@ -1,6 +1,6 @@
 requests==2.25.1
 streamlit==0.80.0
-wkhtmltopdf-pack==0.12.3.0.post1
+git+git://github.com/johnfraney/wkhtmltopdf-pack.git
 pdfkit==0.6.1
 Jinja2==2.11.2
 kaleido==0.2.1
