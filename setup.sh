@@ -1,5 +1,4 @@
 mkdir -p ~/.streamlit/
-apt-get install wkhtmltopdf
 echo "\
 [general]\n\
 email = \"lcalmbach@gmail.com\"\n\
