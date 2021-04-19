@@ -1,4 +1,5 @@
 mkdir -p ~/.streamlit/
+apt-get install wkhtmltopdf
 echo "\
 [general]\n\
 email = \"lcalmbach@gmail.com\"\n\
@@ -8,4 +9,5 @@ echo "\
 headless = true\n\
 enableCORS=false\n\
 port = $PORT\n\
+
 " > ~/.streamlit/config.toml
