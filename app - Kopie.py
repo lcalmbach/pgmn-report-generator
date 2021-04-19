@@ -5,9 +5,6 @@ import jinja2
 import pdfkit
 import base64
 import os
-import sys
-import subprocess
-import platform
 import plotly.express as px
 import numpy as np
 import glob
@@ -21,7 +18,6 @@ BASE_HTML = os.path.join(os.getcwd(), 'html')
 BASE_FIG = os.path.join(os.getcwd(), 'images')
 PDF_TARGET_FILE = f"./pdf/output.pdf"
 CSS_STYLE_FILE = './style.css'
-WKHTMLTOPDF_PATH = 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
 user_settings = {}
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
@@ -45,7 +41,7 @@ def get_data(path: str, sep_char: str):
     except Exception as ex:
         print(ex)
     finally:
-        return data_frames, True
+        return data_frames, ok
     
 
 def get_binary_file_downloader_html(bin_file, file_label='File'):
@@ -203,15 +199,9 @@ def generate_report(report_type, data_frames, stations, year):
             else:
                 st.write(f'{file_name} not found')
             
-        if platform.system() == "Windows":
-            pdfkit_config = pdfkit.configuration(wkhtmltopdf=os.environ.get('WKHTMLTOPDF_BINARY', WKHTMLTOPDF_PATH))
-        else:
-            os.environ['PATH'] += os.pathsep + os.path.dirname(sys.executable) 
-            WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')], 
-                stdout=subprocess.PIPE).communicate()[0].strip()
-            pdfkit_config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)    
+            
         
-        pdfkit.from_string(source_code, PDF_TARGET_FILE, configuration=pdfkit_config, css=CSS_STYLE_FILE, options=options)
+        pdfkit.from_string(source_code, PDF_TARGET_FILE, css = CSS_STYLE_FILE, options=options)
 
     st.info('creating html file')
     _create_html_file()
@@ -251,7 +241,7 @@ def main():
     st.sidebar.markdown("### 🌍 PGMN water levels")
     data_folder = "./test_data/"
     data_frames, ok = get_data(data_folder, ",")
-    st.write(ok)
+    
     if ok:     
         all_stations = st.sidebar.checkbox('All stations')
         if all_stations:
