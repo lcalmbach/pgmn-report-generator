@@ -251,7 +251,6 @@ def main():
     st.sidebar.markdown("### 🌍 PGMN water levels")
     data_folder = "./test_data/"
     data_frames, ok = get_data(data_folder, ",")
-    st.write(ok)
     if ok:     
         all_stations = st.sidebar.checkbox('All stations')
         if all_stations:
