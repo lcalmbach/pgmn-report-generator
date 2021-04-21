@@ -1,5 +1,6 @@
 requests==2.25.1
 streamlit==0.80.0
+wkhtmltopdf-pack-ng==0.12.3.0
 pdfkit==0.6.1
 Jinja2==2.11.2
 kaleido==0.2.1

@@ -207,7 +207,7 @@ def generate_report(report_type, data_frames, stations, year):
             pdfkit_config = pdfkit.configuration(wkhtmltopdf=os.environ.get('WKHTMLTOPDF_BINARY', WKHTMLTOPDF_PATH))
         else:
             os.environ['PATH'] += os.pathsep + os.path.dirname(sys.executable) 
-            WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf')], 
+            WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf-pack')], 
                 stdout=subprocess.PIPE).communicate()[0].strip()
             pdfkit_config = pdfkit.configuration(wkhtmltopdf=WKHTMLTOPDF_CMD)    
         
