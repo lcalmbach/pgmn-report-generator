@@ -26,7 +26,6 @@ BASE_FIG = os.path.join(os.getcwd(), 'images')
 BASE_DATA = os.path.join(os.getcwd(), 'data')
 PDF_TARGET_FILE = os.path.join(BASE_PDF, 'output.pdf') #f"./pdf/output.pdf"
 CSS_STYLE_FILE = './style.css'
-WKHTMLTOPDF_PATH = 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
 STATION_FILE = os.path.join(BASE_DATA, 'PGMN_WELLS_NAD83.csv') #'./test_data/PGMN_WELLS_NAD83.csv'
 user_settings = {}
 
