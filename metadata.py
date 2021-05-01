@@ -16,8 +16,10 @@ TOOLTIP_FORECOLOR = 'black'
 
 class App:
     def __init__(self, data_frames, df_station):
+        st.write(df_station)
         self.data_frames = data_frames
         self.df_station = df_station
+        st.write(self.df_station)
         self.settings = {}
         self.lst_conservation_authorities = ['<all>'] + list(df_station['CONS_AUTHO'].unique())
         self.lst_aquifer = ['<all>'] + list(df_station['AQUIFER_TY'].unique())
@@ -164,7 +166,6 @@ class App:
             self.settings['cons_authorities'] = st.sidebar.multiselect("Conservation authority", self.lst_conservation_authorities, [])
             self.settings['aquifer_types'] = st.sidebar.multiselect("Aquifer types", self.lst_aquifer, [])
         
-        st.write(self.df_station)
         show_filter()
         stations = get_stations()
         st.markdown('### Metadata')
