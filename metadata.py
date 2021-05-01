@@ -124,6 +124,7 @@ class App:
             
 
     def show_menu(self):
+
         @st.cache(persist=True)
         def get_stats(df):
             stat_df = pd.DataFrame()
@@ -143,7 +144,6 @@ class App:
             stat_df = stat_df.reset_index().drop('index', axis=1)
             return stat_df
 
-
         def get_stations():
             df =  self.df_station
             if self.settings['cons_authorities'] != []:
@@ -160,11 +160,11 @@ class App:
 
             return df
 
-
         def show_filter():
             self.settings['cons_authorities'] = st.sidebar.multiselect("Conservation authority", self.lst_conservation_authorities, [])
             self.settings['aquifer_types'] = st.sidebar.multiselect("Aquifer types", self.lst_aquifer, [])
-            
+        
+        st.write(self.df_station)
         show_filter()
         stations = get_stations()
         st.markdown('### Metadata')

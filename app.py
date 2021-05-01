@@ -27,7 +27,6 @@ BASE_DATA = os.path.join(os.getcwd(), 'test_data')
 PDF_TARGET_FILE = os.path.join(BASE_PDF, 'output.pdf') #f"./pdf/output.pdf"
 CSS_STYLE_FILE = './style.css'
 STATION_FILE = os.path.join(BASE_DATA, 'PGMN_WELLS_NAD83.csv') #'./test_data/PGMN_WELLS_NAD83.csv'
-user_settings = {}
 
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
@@ -38,7 +37,6 @@ def get_data():
     info = st.empty()
     
     df_stations = pd.read_csv(STATION_FILE, sep=';')
-    st.write(df_stations)
     file_list = glob.glob(f"{BASE_DATA}\*.zip")
     for f in file_list:
         info.write(f"reading file {f}")
@@ -86,7 +84,6 @@ def display_app_info():
     st.sidebar.markdown(text, unsafe_allow_html=True)
 
 def main():
-    global user_settings
     st.sidebar.markdown("### 🌍 PGMN water levels")
     data_frames, df_stations = get_data()
 

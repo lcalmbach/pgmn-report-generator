@@ -16,6 +16,7 @@ class App:
         self.AGGREGATE_TIME = ['month','year']
     
     def show_menu(self):
+
         def get_stations():
             df =  self.df_station
             if self.settings['cons_authorities'] != []:
@@ -75,7 +76,7 @@ class App:
         show_filter()
         show_plot()
 
-    def plot_time_series(self, df, config):            
+    def plot_time_series(self, df, config):
         min = df['wl_elev'].min()
         max = df['wl_elev'].max()
         min_year = int(df['year'].min())
