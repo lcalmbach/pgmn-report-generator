@@ -40,7 +40,7 @@ def main():
 
     my_app = st.sidebar.selectbox("Application", options=list(MENU_DIC.keys()),
     format_func=lambda x: MENU_DIC[x])
-    app = my_app.App(df_stations)
+    app = my_app.App([], df_stations)
     app.show_menu()
 
 if __name__ == "__main__":
