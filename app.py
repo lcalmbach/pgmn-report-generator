@@ -18,16 +18,10 @@ conn = {}
 config = {} # dictionary mit allen Konfigurationseinträgen
 MENU_DIC = {metadata: 'Metadata on wells', pgmn_explorer: 'Explore water level data', pgmn_report_generator: 'Generate pdf reports'}
 
-TABLE_TEMPLATE_FILE = "table_template.html"
-FIG_TEMPLATE_FILE = "figure_template.html"
-BASE_HTML = os.path.join(os.getcwd(), 'html')
-BASE_PDF = os.path.join(os.getcwd(), 'pdf')
-BASE_FIG = os.path.join(os.getcwd(), 'images')
-BASE_DATA = os.path.join(os.getcwd(), 'data')
-PDF_TARGET_FILE = os.path.join(BASE_PDF, 'output.pdf') #f"./pdf/output.pdf"
-CSS_STYLE_FILE = './style.css'
-STATION_FILE = os.path.join(BASE_DATA, 'PGMN_WELLS_NAD83.csv') #'./test_data/PGMN_WELLS_NAD83.csv'
 
+BASE_DATA = os.path.join(os.getcwd(), 'static','data')
+CSS_STYLE_FILE = './style.css'
+STATION_FILE = os.path.join(BASE_DATA, 'PGMN_WELLS_NAD83.csv') 
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def get_data():
@@ -38,7 +32,6 @@ def get_data():
     
     df_stations = pd.read_csv(STATION_FILE, sep=';')
     file_list = glob.glob(f"{BASE_DATA}/*.zip")
-    st.write(file_list)
     for f in file_list:
         info.write(f"reading file {f}")
         try:

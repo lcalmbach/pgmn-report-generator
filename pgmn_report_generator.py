@@ -12,18 +12,13 @@ import numpy as np
 import tools
 import calendar
 
-TABLE_TEMPLATE_FILE = "table_template.html"
-FIG_TEMPLATE_FILE = "figure_template.html"
-BASE_HTML = os.path.join(os.getcwd(), 'html')
-BASE_PDF = os.path.join(os.getcwd(), 'pdf')
-BASE_FIG = os.path.join(os.getcwd(), 'images')
-BASE_DATA = os.path.join(os.getcwd(), 'test_data')
-PDF_TARGET_FILE = os.path.join(BASE_PDF, 'test_data') #f"./pdf/output.pdf"
+TABLE_TEMPLATE_FILE = 'table_template.html'
+FIG_TEMPLATE_FILE = 'figure_template.html'
+BASE_HTML = os.path.join(os.getcwd(), 'static','html')
+BASE_FIG = os.path.join(os.getcwd(), 'static','images')
+PDF_TARGET_FILE = os.path.join(os.getcwd(), 'static','pdf', 'output.pdf') 
 CSS_STYLE_FILE = './style.css'
-WKHTMLTOPDF_PATH = 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
-STATION_FILE = os.path.join(BASE_DATA, 'PGMN_WELLS_NAD83.csv') #'./test_data/PGMN_WELLS_NAD83.csv'
-user_settings = {}
-
+WKHTMLTOPDF_WIN_PATH = 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
 
 class App:
     def __init__(self, data_frames, df_station):
@@ -57,7 +52,6 @@ class App:
             default = [self.stations[0]]
             self.settings['stations'] = st.sidebar.multiselect("Station", self.stations, default)
             self.settings['year_from'], self.settings['year_to'] = st.sidebar.select_slider("Years", range(2001,2020),[2001,2002])
-            self.settings['report_title'] = st.sidebar.text_input('Report title')
             
         show_filter()
         self.generate_report(self.data_frames, self.settings['stations'], range(self.settings['year_from'], self.settings['year_to'] + 1))            
@@ -74,14 +68,14 @@ class App:
 
     def get_file_name(self,station, year, fmt):
         if fmt in ('png','jpeg'):
-            path = './images/'
+            path = BASE_FIG
         else:
-            path = './html/'
-        return f"{path}{station}_{year}.{fmt}"
+            path = BASE_HTML
+        return f"{path}/{station}_{year}.{fmt}"
 
 
     def save_plot(self,fig, station, year):
-        file_name = f"./images/{station}_{year}.png"
+        file_name = f"./static/images/{station}_{year}.png"
         fig.write_image(file_name, engine="kaleido")
 
 
@@ -106,7 +100,7 @@ class App:
 
 
     def create_html_fig(self, station,year):
-        templateLoader = jinja2.FileSystemLoader(searchpath="./")
+        templateLoader = jinja2.FileSystemLoader(searchpath="./static/templates/")
         templateEnv = jinja2.Environment(loader=templateLoader)
         template = templateEnv.get_template(FIG_TEMPLATE_FILE)
         # find the saved file and encode it
@@ -180,7 +174,7 @@ class App:
                         st.write(f'{file_name} not found')
                 
             if platform.system() == "Windows":
-                pdfkit_config = pdfkit.configuration(wkhtmltopdf=os.environ.get('WKHTMLTOPDF_BINARY', WKHTMLTOPDF_PATH))
+                pdfkit_config = pdfkit.configuration(wkhtmltopdf=os.environ.get('WKHTMLTOPDF_BINARY', WKHTMLTOPDF_WIN_PATH))
             else:
                 os.environ['PATH'] += os.pathsep + os.path.dirname(sys.executable) 
                 WKHTMLTOPDF_CMD = subprocess.Popen(['which', os.environ.get('WKHTMLTOPDF_BINARY', 'wkhtmltopdf-pack')], 
@@ -189,6 +183,8 @@ class App:
             
             pdfkit.from_string(source_code, PDF_TARGET_FILE, configuration=pdfkit_config, css=CSS_STYLE_FILE, options=options)
 
+        year_expression = self.settings['year_from'] if self.settings['year_from'] == self.settings['year_to'] else f"{self.settings['year_from']}-{self.settings['year_to']}"
+        self.settings['report_title'] = st.text_input('Report title', f'PGMN Monitoring wells ({year_expression})')
         if st.button("Create pdf report"):
             st.info('creating html file')
             _create_html_file()
@@ -196,9 +192,9 @@ class App:
             _create_pdf_files()
             st.success('Done')
         
-        base64_pdf = tools.get_base64_encoded_image(PDF_TARGET_FILE)
-        pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf">' 
-        st.markdown(pdf_display, unsafe_allow_html=True)
-        st.markdown(tools.get_binary_file_downloader_html(PDF_TARGET_FILE), unsafe_allow_html=True)
+            base64_pdf = tools.get_base64_encoded_image(PDF_TARGET_FILE)
+            pdf_display = f'<embed src="data:application/pdf;base64,{base64_pdf}" width="700" height="1000" type="application/pdf">' 
+            st.markdown(pdf_display, unsafe_allow_html=True)
+            st.markdown(tools.get_binary_file_downloader_html(PDF_TARGET_FILE), unsafe_allow_html=True)
     
 

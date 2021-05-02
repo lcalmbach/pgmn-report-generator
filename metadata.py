@@ -72,7 +72,6 @@ class App:
             self.settings['aquifer_types'] = st.sidebar.multiselect("Aquifer types", self.lst_aquifer, [])
         
         show_filter()
-        
         stations = get_stations()
         with st.beta_expander(f'Metadata ({len(stations)})'):
             st.write(stations)
