@@ -35,7 +35,7 @@ def get_data():
     info = st.empty()
     
     df_stations = pd.read_csv(STATION_FILE, sep=';')
-    file_list = glob.glob(f"{BASE_DATA}\*.zip")
+    file_list = glob.glob(f"{BASE_DATA}/*.zip")
     st.write(file_list)
     for f in file_list:
         info.write(f"reading file {f}")
