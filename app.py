@@ -29,18 +29,41 @@ STATION_FILE = os.path.join(BASE_DATA, 'PGMN_WELLS_NAD83.csv') #'./test_data/PGM
 
 @st.cache(suppress_st_warning=True, allow_output_mutation=True)
 def get_data():
+    data_frames = {}
+    df_stations = pd.DataFrame()
+    rows = 0
+    info = st.empty()
     
     df_stations = pd.read_csv(STATION_FILE, sep=';')
-    return df_stations
+    file_list = glob.glob(f"{BASE_DATA}\*.zip")
+    st.write(file_list)
+    for f in file_list:
+        info.write(f"reading file {f}")
+        try:
+            df = pd.read_csv(f, sep=",")
+            df = df.rename(columns={'READING_DTTM':'date', 'Water_Level_Elevation_meter_above_sea_level': 'wl_elev'})
+            df['date'] = pd.to_datetime(df['date'])    
+            df['year'] = df['date'].dt.year    
+            df['month'] = df['date'].dt.month    
+            rows += len(df)
+            station = df.iloc[0]['CASING_ID']
+            data_frames[station] = df
+        except Exception as ex:
+            print(f'error in {f}:{ex}')
+
+    piezo_stations = list(data_frames.keys())
+    df_stations = df_stations[df_stations['PGMN_WELL'].isin(piezo_stations)]
+    
+    return data_frames, df_stations
     
 
 def main():
     st.sidebar.markdown("### 🌍 PGMN water levels")
-    df_stations = get_data()
+    data_frames, df_stations = get_data()
 
     my_app = st.sidebar.selectbox("Application", options=list(MENU_DIC.keys()),
     format_func=lambda x: MENU_DIC[x])
-    app = my_app.App([], df_stations)
+    app = my_app.App(data_frames, df_stations)
     app.show_menu()
 
 if __name__ == "__main__":
