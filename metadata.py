@@ -2,7 +2,7 @@
 import pandas as pd
 import streamlit as st
 #import tools
-#import numpy as np
+import numpy as np
 
 LATITUDE_COLUMN = 'LATITUDE'
 LONGITUDE_COLUMN = 'LONGITUDE'
@@ -32,16 +32,23 @@ class App:
                 _df = self.data_frames[station]
                 _df = _df[['CASING_ID','year','wl_elev']]
                 agg_df = _df.groupby('CASING_ID').agg(
-                    year_min=pd.NamedAgg(column="year", aggfunc="min"),
-                    year_max=pd.NamedAgg(column="year", aggfunc="max"),
+                    first_year=pd.NamedAgg(column="year", aggfunc="min"),
+                    last_year=pd.NamedAgg(column="year", aggfunc="max"),
                     wl_elev_min=pd.NamedAgg(column="wl_elev", aggfunc="min"),
                     wl_elev_max=pd.NamedAgg(column="wl_elev", aggfunc="max"),
                     wl_elev_mean=pd.NamedAgg(column="wl_elev", aggfunc="mean"),
                     wl_elev_std=pd.NamedAgg(column="wl_elev", aggfunc="std")
                 ).reset_index()
                 stat_df = stat_df.append(agg_df)
-        
+
+            
             stat_df = stat_df.reset_index().drop('index', axis=1)
+            stat_df = stat_df.style.format({
+                'wl_elev_min': '{:,.2f}'.format,
+                'wl_elev_max': '{:,.2f}'.format,
+                'wl_elev_mean': '{:,.2f}'.format,
+                'wl_elev_std': '{:,.2f}'.format
+            })
             return stat_df
 
         def get_stations():
@@ -65,12 +72,13 @@ class App:
             self.settings['aquifer_types'] = st.sidebar.multiselect("Aquifer types", self.lst_aquifer, [])
         
         show_filter()
+        
         stations = get_stations()
-        st.markdown('### Metadata')
-        st.write(stations)
-        st.markdown('### Statistics')
-        stats = get_stats(stations)
-        st.write(stats)
+        with st.beta_expander(f'Metadata ({len(stations)})'):
+            st.write(stations)
+        with st.beta_expander(f'Statistics {len(stations)}'):
+            stats = get_stats(stations)
+            st.write(stats)
 
         # self.plot_map('stations', stations, 'ScatterplotLayer', 'WELL_DEPTH')
 

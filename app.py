@@ -5,6 +5,8 @@ import os
 import glob
 
 import metadata
+import pgmn_report_generator
+import pgmn_explorer
 
 __version__ = '0.0.6' 
 __author__ = 'lukas calmbach'
@@ -14,7 +16,7 @@ my_name = 'PGMN waterlevel data'
 my_kuerzel = "PWD"
 conn = {}
 config = {} # dictionary mit allen Konfigurationseinträgen
-MENU_DIC = {metadata: 'Metadata on wells'}
+MENU_DIC = {metadata: 'Metadata on wells', pgmn_explorer: 'Explore water level data', pgmn_report_generator: 'Generate pdf reports'}
 
 TABLE_TEMPLATE_FILE = "table_template.html"
 FIG_TEMPLATE_FILE = "figure_template.html"
