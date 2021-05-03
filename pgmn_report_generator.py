@@ -13,6 +13,7 @@ import tools
 import calendar
 
 TABLE_TEMPLATE_FILE = 'table_template.html'
+TOC_TEMPLATE_FILE = 'toc_template.html'
 FIG_TEMPLATE_FILE = 'figure_template.html'
 BASE_HTML = os.path.join(os.getcwd(), 'static','html')
 BASE_FIG = os.path.join(os.getcwd(), 'static','images')
@@ -131,7 +132,28 @@ class App:
                         self.create_html_fig(station,year)
                     else:
                         st.write(f'no data availale for this station in {year}')
+
+        def _make_toc_html():
+            df = pd.DataFrame(columns=['station','year','page'])
+            pageno = 2
+            for station in stations:
+                for year in years:
+                    df = df.append({'station': station,'year': year,'page':pageno}, ignore_index=True)
+                    pageno += 1
+
+            templateLoader = jinja2.FileSystemLoader(searchpath="./")
+            templateEnv = jinja2.Environment(loader=templateLoader)
             
+            template = templateEnv.get_template(TOC_TEMPLATE_FILE)
+            outputText = template.render(df=df)
+            file_name = f'toc.html'
+            file_name = os.path.join(BASE_HTML, 'toc.html')
+            html_file = open(file_name, 'w')
+            html_file.write(outputText)
+            html_file.close()
+
+            return file_name
+
         def _create_pdf_files():
             """
             all options, see: https://wkhtmltopdf.org/usage/wkhtmltopdf.txt
@@ -156,7 +178,12 @@ class App:
                 'header-center': self.settings['report_title'],
                 'print-media-type': None
                 }
-            source_code = ''
+
+            # write TOC-page
+            toc_file = _make_toc_html()
+            html_file = open(os.path.join(BASE_HTML, toc_file), 'r', encoding='utf-8')
+            source_code = html_file.read() 
+
             for station in stations:
                 for year in years:
                     file_name = os.path.join(BASE_HTML, f'tab-{station}-{year}.html')
@@ -167,7 +194,7 @@ class App:
                         # same for figure
                         file_name = os.path.join(BASE_HTML, f'fig-{station}-{year}.html')
                         html_file = open(os.path.join(BASE_HTML, file_name), 'r', encoding='utf-8')
-                        source_code += '<br><br>' + html_file.read() 
+                        source_code += '<br>' + html_file.read() 
                         # write the page break
                         source_code += '<p class="new-page"></p>'
                     else:

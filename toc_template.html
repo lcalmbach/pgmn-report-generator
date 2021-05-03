@@ -1,0 +1,20 @@
+<head>
+    <!-- <link rel="stylesheet" href="style.css"> -->
+</head>
+<body>
+    <h1>Table of Contents</h1>
+    <table style="page-break-after: always;">
+        <tr>
+            <th>Monitoring Well</th>
+            <th>Year</th>
+            <th>Page</th>
+        </tr>
+        {% for idx, row in df.iterrows() %}
+        <tr>
+            <td>{{ row['station'] }}</td>
+            <td>{{ row['year'] }}</td>
+            <td>{{ row['page'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>

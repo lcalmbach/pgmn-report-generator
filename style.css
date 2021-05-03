@@ -7,6 +7,6 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 
 @media print {
   .new-page {
-    page-break-before: always;
+    page-break-after: always;
   }
 }
