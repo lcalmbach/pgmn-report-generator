@@ -8,14 +8,15 @@ import sys
 import subprocess
 import platform
 import plotly.express as px
-import numpy as np
 import tools
 import calendar
 
 TABLE_TEMPLATE_FILE = 'table_template.html'
 TOC_TEMPLATE_FILE = 'toc_template.html'
+
 FIG_TEMPLATE_FILE = 'figure_template.html'
 BASE_HTML = os.path.join(os.getcwd(), 'static','html')
+TOC_FILE = os.path.join(BASE_HTML, 'toc.html')
 BASE_FIG = os.path.join(os.getcwd(), 'static','images')
 PDF_TARGET_FILE = os.path.join(os.getcwd(), 'static','pdf', 'output.pdf') 
 CSS_STYLE_FILE = './style.css'
@@ -133,7 +134,10 @@ class App:
                     else:
                         st.write(f'no data availale for this station in {year}')
 
+        
+        
         def _make_toc_html():
+            ok = True
             df = pd.DataFrame(columns=['station','year','page'])
             pageno = 2
             for station in stations:
@@ -145,14 +149,12 @@ class App:
             templateEnv = jinja2.Environment(loader=templateLoader)
             
             template = templateEnv.get_template(TOC_TEMPLATE_FILE)
-            outputText = template.render(df=df)
-            file_name = f'toc.html'
-            file_name = os.path.join(BASE_HTML, 'toc.html')
-            html_file = open(file_name, 'w')
-            html_file.write(outputText)
+            html = template.render(df=df)
+            html_file = open(TOC_FILE, 'w')
+            html_file.write(html)
             html_file.close()
 
-            return file_name
+            return ok
 
         def _create_pdf_files():
             """
@@ -180,10 +182,8 @@ class App:
                 }
 
             # write TOC-page
-            toc_file = _make_toc_html()
-            html_file = open(os.path.join(BASE_HTML, toc_file), 'r', encoding='utf-8')
-            source_code = html_file.read() 
-
+            source_code = open(TOC_FILE, 'r', encoding='utf-8').read() 
+            
             for station in stations:
                 for year in years:
                     file_name = os.path.join(BASE_HTML, f'tab-{station}-{year}.html')
@@ -199,7 +199,7 @@ class App:
                         source_code += '<p class="new-page"></p>'
                     else:
                         st.write(f'{file_name} not found')
-                
+
             if platform.system() == "Windows":
                 pdfkit_config = pdfkit.configuration(wkhtmltopdf=os.environ.get('WKHTMLTOPDF_BINARY', WKHTMLTOPDF_WIN_PATH))
             else:
@@ -213,9 +213,11 @@ class App:
         year_expression = self.settings['year_from'] if self.settings['year_from'] == self.settings['year_to'] else f"{self.settings['year_from']}-{self.settings['year_to']}"
         self.settings['report_title'] = st.text_input('Report title', f'PGMN Monitoring wells ({year_expression})')
         if st.button("Create pdf report"):
-            st.info('creating html file')
+            st.info('Generating TOC')
+            _make_toc_html()
+            st.info('Generating html file')
             _create_html_file()
-            st.info('generating pdf file')
+            st.info('Generating pdf file')
             _create_pdf_files()
             st.success('Done')
         
