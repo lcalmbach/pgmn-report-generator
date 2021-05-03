@@ -52,7 +52,7 @@ class App:
             self.stations = get_stations()
             default = [self.stations[0]]
             self.settings['stations'] = st.sidebar.multiselect("Station", self.stations, default)
-            self.settings['year_from'], self.settings['year_to'] = st.sidebar.select_slider("Years", range(2001,2020),[2001,2002])
+            self.settings['year_from'], self.settings['year_to'] = st.select_slider("Years", range(2001,2020),[2001,2002])
             
         show_filter()
         self.generate_report(self.data_frames, self.settings['stations'], range(self.settings['year_from'], self.settings['year_to'] + 1))            
@@ -194,7 +194,7 @@ class App:
                         # same for figure
                         file_name = os.path.join(BASE_HTML, f'fig-{station}-{year}.html')
                         html_file = open(os.path.join(BASE_HTML, file_name), 'r', encoding='utf-8')
-                        source_code += '<br>' + html_file.read() 
+                        source_code += html_file.read() 
                         # write the page break
                         source_code += '<p class="new-page"></p>'
                     else:

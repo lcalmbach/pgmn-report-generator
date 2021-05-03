@@ -8,7 +8,7 @@ import metadata
 import pgmn_report_generator
 import pgmn_explorer
 
-__version__ = '0.0.6' 
+__version__ = '0.0.7' 
 __author__ = 'lukas calmbach'
 __author_email__ = 'lukas.calmbach@bs.ch'
 version_date = '2021-04-30'
