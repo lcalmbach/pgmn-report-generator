@@ -1,3 +1,7 @@
+body {
+  font-family: 'Arial'
+}
+
 th, td {
   text-align: left;
   padding: 8px;
@@ -5,8 +9,3 @@ th, td {
 
 tr:nth-child(even) {background-color: #f2f2f2;}
 
-@media print {
-  .new-page {
-    page-break-after: always;
-  }
-}
