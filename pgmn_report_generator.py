@@ -10,6 +10,7 @@ import platform
 import plotly.express as px
 import tools
 import calendar
+from datetime import date
 
 TABLE_TEMPLATE_FILE = 'table_template.html'
 TOC_TEMPLATE_FILE = 'toc_template.html'
@@ -21,6 +22,9 @@ BASE_FIG = os.path.join(os.getcwd(), 'static','images')
 PDF_TARGET_FILE = os.path.join(os.getcwd(), 'static','pdf', 'output.pdf') 
 CSS_STYLE_FILE = './style.css'
 WKHTMLTOPDF_WIN_PATH = 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
+
+current_year = date.today().year
+first_year = 2001
 
 class App:
     def __init__(self, df_stations, df_waterlevels, df_precipitation, df_wl_stations, df_precipitation_stations):
@@ -57,7 +61,7 @@ class App:
             lst_stations = get_stations()
             default = [lst_stations[0]]
             self.settings['stations'] = st.sidebar.multiselect("Station", lst_stations, default)
-            self.settings['year_from'], self.settings['year_to'] = st.select_slider("Years", range(2001,2020),[2001,2002])
+            self.settings['year_from'], self.settings['year_to'] = st.select_slider("Years", range(first_year,current_year),[current_year-6,current_year-1])
             
         show_filter()
         self.generate_report(self.df_waterlevels, self.settings['stations'], range(self.settings['year_from'], self.settings['year_to'] + 1))            

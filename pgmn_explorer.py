@@ -42,7 +42,7 @@ class App:
             config['height'] = self.settings['height']
             config['year_from'] = self.settings['year_from']
             config['year_to'] = self.settings['year_to']
-            config['rolling_avg_int'] = self.settings['rolling_avg_int']
+            config['rolling_avg_int'] = 0 # todo: self.settings['rolling_avg_int']
             for station in self.settings['stations']:
                 config['title'] = f"{station} ({self.settings['year_from']} - {self.settings['year_to']})"
                 df_wl = self.df_waterlevels[self.df_waterlevels['CASING_ID'] == station] 
@@ -77,13 +77,13 @@ class App:
             lst_stations = get_stations()
             default = [lst_stations[0]]
             self.settings['stations'] = st.sidebar.multiselect("🎯 Station", lst_stations, default)
-            self.settings['year_from'], self.settings['year_to'] = st.sidebar.select_slider("Years", range(first_year,current_year-1),[current_year-7,current_year-2])
+            self.settings['year_from'], self.settings['year_to'] = st.sidebar.select_slider("Years", range(first_year,current_year),[current_year-6,current_year-1])
             self.settings['group_by_year'] = st.sidebar.checkbox("Group plots by year")
             self.settings['width'] = st.sidebar.number_input('Plot width (px)', value=800,min_value=100,max_value=10000)
             self.settings['height']= st.sidebar.number_input('Plot height (px)', value=300,min_value=100,max_value=10000)
-            self.settings['use_common_y']= st.sidebar.checkbox('Use common min/max_yy values per station')
-            self.settings['max_y']= st.sidebar.number_input('Maximum y')
-            self.settings['rolling_avg_int']= st.sidebar.number_input('Rolling average interval', value=0,min_value=0,max_value=100000)
+            #self.settings['use_common_y']= st.sidebar.checkbox('Use common min/max Y-values for each plot')
+            #self.settings['max_y']= st.sidebar.number_input('Maximum y')
+            self.settings['rolling_avg_int']= 0 #todo: st.sidebar.number_input('Rolling average interval', value=0,min_value=0,max_value=100000)
         
         show_filter()
         show_plot()
