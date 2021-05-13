@@ -5,99 +5,105 @@ import altair as alt
 import tools
 
 class App:
-    def __init__(self, data_frames, df_station):
-        self.data_frames = data_frames
-        self.df_station = df_station
+    def __init__(self, df_stations, df_waterlevels, df_precipitation, df_wl_stations, df_precipitation_stations):
+        self.df_stations = df_stations
+        self.df_waterlevels = df_waterlevels
+        self.df_precipitation = df_precipitation
+        self.df_wl_stations = df_wl_stations
+        self.df_precipitation_stations = df_precipitation_stations
+
         self.settings = {}
-        self.lst_conservation_authorities = ['<all>'] + list(df_station['CONS_AUTHO'].unique())
-        self.lst_aquifer = ['<all>'] + list(df_station['AQUIFER_TY'].unique())
+        self.lst_conservation_authorities = ['<all>'] + list(df_stations['CONS_AUTHO'].unique())
+        self.lst_aquifer = ['<all>'] + list(df_stations['AQUIFER_TY'].unique())
         self.stations = []
-        self.PLOTS = ['timeseries', 'bartchart ', 'map']
-        self.AGGREGATE_TIME = ['month','year']
     
     def show_menu(self):
 
         def get_stations():
-            df =  self.df_station
-            if self.settings['cons_authorities'] != []:
+            df =  self.df_stations
+            if len(self.settings['cons_authorities']) > 0:
                 filter = df['CONS_AUTHO'].isin(self.settings['cons_authorities']) 
-                df =  self.df_station[filter]
+                df =  self.df_stations[filter]
             
-            if self.settings['aquifer_types'] != []:
+            if len(self.settings['aquifer_types']) > 0:
                 filter = df['AQUIFER_TY'].isin(self.settings['aquifer_types'])
                 df =  df[filter]
 
             return list(df['PGMN_WELL'])
 
         def show_plot():            
-            figs = []
-            dfs = []
             config={}
+            config['width'] =  self.settings['width']
+            config['height'] = self.settings['height']
+            config['year_from'] = self.settings['year_from']
+            config['year_to'] = self.settings['year_to']
+            config['rolling_avg_int'] = self.settings['rolling_avg_int']
             for station in self.settings['stations']:
-                if self.settings['avg_days']:
-                    df = self.data_frames[station].copy()
-                    df['date'] = df['date'].dt.date 
-                    df = df.groupby(['CASING_ID', 'date']).agg('mean').reset_index()
-                    df['date'] = pd.to_datetime(df['date'])    
-                else:
-                    df = self.data_frames[station] 
+                config['title'] = f"{station} ({self.settings['year_from']} - {self.settings['year_to']})"
+                df_wl = self.df_waterlevels[self.df_waterlevels['CASING_ID'] == station] 
+                location_id = int(df_wl.iloc[0]['location_id'])
+                df_prec = self.df_precipitation[self.df_precipitation['location_id'] == location_id] 
+                
                 if self.settings['group_by_year']:
-                    for year in range(self.settings['year_from'], self.settings['year_to']):                            
-                        dfs.append(df[df['year'] == year])
-                        if len(dfs[-1])>0:
-                            title = f'{station} ({year})'
+                    for year in range(self.settings['year_from'], self.settings['year_to']):  
+                        config['year_from'] = year
+                        config['year_to'] = year
 
-                            figs.append(self.plot_time_series(dfs[-1],config))
-                            st.write(figs[-1]) 
-                elif len(df)>0:
-                    df = df[ (df['year']>= self.settings['year_from']) & (df['year']<= self.settings['year_to']) ]
+                        config['title'] = f"{station} ({year})"                      
+                        if len(df_wl[(df_wl['year'] == year)]) > 0: 
+                            config['title'] = f'{station} ({year})'
+
+                            fig = self.plot_time_series(df_wl, df_prec, config)
+                            st.write(fig) 
+                elif len(df_wl) > 50:
+                    df_wl = df_wl[ (df_wl['year']>= self.settings['year_from']) & (df_wl['year']<= self.settings['year_to']) ]
                     config['title'] = f"{station} ({self.settings['year_from']} - {self.settings['year_to']})"
                     config['width'] =  self.settings['width']
                     config['height'] = self.settings['height']
-                    config['rolling_avg_int'] = self.settings['rolling_avg_int']
-                    fig = self.plot_time_series(df, config)
+                    config['rolling_avg_int'] = 0 # todo: self.settings['rolling_avg_int']
+                    fig = self.plot_time_series(df_wl, df_prec, config)
                     st.write(fig)
 
         def show_filter():
             default=[self.lst_conservation_authorities[0]]
-            self.settings['cons_authorities'] = st.sidebar.multiselect("Conservation authority", self.lst_conservation_authorities, [])
+            self.settings['cons_authorities'] = st.sidebar.multiselect("🔎 Conservation authority", self.lst_conservation_authorities, [])
             default=[self.lst_aquifer[0]]
-            self.settings['aquifer_types'] = st.sidebar.multiselect("Aquifer types", self.lst_aquifer, [])
-            self.stations = get_stations()
-            default = [self.stations[0]]
-            self.settings['stations'] = st.sidebar.multiselect("Station", self.stations, default)
+            self.settings['aquifer_types'] = st.sidebar.multiselect("🔎 Aquifer types", self.lst_aquifer, [])
+            lst_stations = get_stations()
+            default = [lst_stations[0]]
+            self.settings['stations'] = st.sidebar.multiselect("🎯 Station", lst_stations, default)
             self.settings['year_from'], self.settings['year_to'] = st.sidebar.select_slider("Years", range(2001,2020),[2001,2002])
             self.settings['group_by_year'] = st.sidebar.checkbox("Group plots by year")
-            self.settings['avg_days'] = st.sidebar.checkbox("Plot daily average values")
             self.settings['width'] = st.sidebar.number_input('Plot width (px)', value=800,min_value=100,max_value=10000)
             self.settings['height']= st.sidebar.number_input('Plot height (px)', value=300,min_value=100,max_value=10000)
+            self.settings['use_common_y']= st.sidebar.checkbox('Use common min/max_yy values per station')
+            self.settings['max_y']= st.sidebar.number_input('Maximum y')
             self.settings['rolling_avg_int']= st.sidebar.number_input('Rolling average interval', value=0,min_value=0,max_value=100000)
         
         show_filter()
         show_plot()
 
-    def plot_time_series(self, df, config):
-        min = df['wl_elev'].min()
-        max = df['wl_elev'].max()
-        min_year = int(df['year'].min())
-        max_year = int(df['year'].max() + 1)
+    def plot_time_series(self, df_wl, df_prec, config):
+        min_year = config['year_from']
+        max_year = config['year_to'] + 1
+        min_y= df_wl['wl_elev'].min()
+        max_y= df_wl['wl_elev'].max()
+        min_y= tools.truncate(min_y, 0) 
+        max_y= tools.truncate(max_y+ 1, 0) 
 
-        min = tools.truncate(min, 0) 
-        max = tools.truncate(max + 1, 0) 
-
-        raw_data = alt.Chart(df).mark_line().encode(
+        waterlevels = alt.Chart(df_wl).mark_line(clip=True).encode(
             alt.X('date:T',
                 scale = alt.Scale(domain=(f'01-01-{min_year}', f'01-01-{max_year}')),
                 axis=alt.Axis(title=""),
             ),
             alt.Y('wl_elev:Q', 
-                scale = alt.Scale(domain=(min,max)),
+                scale = alt.Scale(domain=(min_y,max_y)),
                 axis=alt.Axis(title="water level (masl)"),
             ),
             tooltip=['CASING_ID', 'date', 'wl_elev']
         )
         if config['rolling_avg_int'] > 0:
-            rolling_avg = alt.Chart(df).mark_line(
+            rolling_avg = alt.Chart(df_wl).mark_line(
                     color='red',
                     size=2
                 ).transform_window(
@@ -107,10 +113,29 @@ class App:
                 x='date:T',
                 y='rolling_mean:Q'
             )
+        if len(df_prec) > 0:
+            precipitation = alt.Chart(df_prec).mark_bar(color='grey', size=1, clip=True).encode(
+            alt.X('date:T',
+                scale = alt.Scale(domain=(f'01-01-{min_year}', f'01-01-{max_year}')),
+                axis=alt.Axis(title=""),
+                
+            ),
+            alt.Y('AccumulationFinal:Q', 
+                sort='descending',
+                scale = alt.Scale(domain=[0,100]),                
+                axis=alt.Axis(title="precipitation(mm)"),
+            ),
+            tooltip=['date', 'AccumulationFinal']
+        )
+
+
         if config['rolling_avg_int'] > 0:
-            fig = (raw_data + rolling_avg)
+            fig = (waterlevels + rolling_avg)
+        elif len(df_prec) > 0:
+            fig = alt.layer(waterlevels, precipitation).resolve_scale(y='independent')
         else:
-            fig = raw_data
+            fig = waterlevels
+
         fig = fig.properties(
             title=config['title'],
             width=config['width'],

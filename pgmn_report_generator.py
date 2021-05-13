@@ -23,12 +23,16 @@ CSS_STYLE_FILE = './style.css'
 WKHTMLTOPDF_WIN_PATH = 'C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe'
 
 class App:
-    def __init__(self, data_frames, df_station):
-        self.data_frames = data_frames
-        self.df_station = df_station
+    def __init__(self, df_stations, df_waterlevels, df_precipitation, df_wl_stations, df_precipitation_stations):
+        self.df_stations = df_stations
+        self.df_waterlevels = df_waterlevels
+        self.df_precipitation = df_precipitation
+        self.df_wl_stations = df_wl_stations
+        self.df_precipitation_stations = df_precipitation_stations
+
         self.settings = {}
-        self.lst_conservation_authorities = list(df_station['CONS_AUTHO'])
-        self.lst_aquifer = list(df_station['AQUIFER_TY'])
+        self.lst_conservation_authorities = list(df_stations['CONS_AUTHO'])
+        self.lst_aquifer = list(df_stations['AQUIFER_TY'])
 
     
     def show_menu(self):
