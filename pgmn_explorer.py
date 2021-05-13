@@ -1,5 +1,6 @@
 from __future__ import print_function
 import pandas as pd
+import numpy as np
 import streamlit as st
 import altair as alt
 from datetime import date
@@ -48,7 +49,7 @@ class App:
                 df_wl = self.df_waterlevels[self.df_waterlevels['CASING_ID'] == station] 
                 location_id = int(df_wl.iloc[0]['location_id'])
                 df_prec = self.df_precipitation[self.df_precipitation['location_id'] == location_id] 
-                
+                st.write()
                 if self.settings['group_by_year']:
                     for year in range(self.settings['year_from'], self.settings['year_to']):  
                         config['year_from'] = year
@@ -60,14 +61,15 @@ class App:
 
                             fig = self.plot_time_series(df_wl, df_prec, config)
                             st.write(fig) 
-                elif len(df_wl) > 50:
+                else:
                     df_wl = df_wl[ (df_wl['year']>= self.settings['year_from']) & (df_wl['year']<= self.settings['year_to']) ]
-                    config['title'] = f"{station} ({self.settings['year_from']} - {self.settings['year_to']})"
-                    config['width'] =  self.settings['width']
-                    config['height'] = self.settings['height']
-                    config['rolling_avg_int'] = 0 # todo: self.settings['rolling_avg_int']
-                    fig = self.plot_time_series(df_wl, df_prec, config)
-                    st.write(fig)
+                    if not df_wl.empty:
+                        config['title'] = f"{station} ({self.settings['year_from']} - {self.settings['year_to']})"
+                        config['width'] =  self.settings['width']
+                        config['height'] = self.settings['height']
+                        config['rolling_avg_int'] = 0 # todo: self.settings['rolling_avg_int']
+                        fig = self.plot_time_series(df_wl, df_prec, config)
+                        st.write(fig)
 
         def show_filter():
             default=[self.lst_conservation_authorities[0]]

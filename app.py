@@ -14,7 +14,7 @@ import pgmn_info as info
 
 
 
-__version__ = '0.0.8' 
+__version__ = '0.0.9' 
 __author__ = 'Lukas Calmbach'
 __author_email__ = 'lcalmbach@gmail.com'
 VERSION_DATE = '2021-05-13'
