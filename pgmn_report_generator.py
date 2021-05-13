@@ -38,12 +38,12 @@ class App:
     def show_menu(self):
 
         def get_stations():
-            df =  self.df_station
-            if self.settings['cons_authorities'] != []:
+            df =  self.df_stations
+            if len(self.settings['cons_authorities']) > 0:
                 filter = df['CONS_AUTHO'].isin(self.settings['cons_authorities']) 
                 df =  self.df_station[filter]
             
-            if self.settings['aquifer_types'] != []:
+            if len(self.settings['aquifer_types']) > 0:
                 filter = df['AQUIFER_TY'].isin(self.settings['aquifer_types'])
                 df =  df[filter]
 
@@ -54,14 +54,13 @@ class App:
             self.settings['cons_authorities'] = st.sidebar.multiselect("Conservation authority", self.lst_conservation_authorities, [])
             default=[self.lst_aquifer[0]]
             self.settings['aquifer_types'] = st.sidebar.multiselect("Aquifer types", self.lst_aquifer, [])
-            self.stations = get_stations()
-            default = [self.stations[0]]
-            self.settings['stations'] = st.sidebar.multiselect("Station", self.stations, default)
+            lst_stations = get_stations()
+            default = [lst_stations[0]]
+            self.settings['stations'] = st.sidebar.multiselect("Station", lst_stations, default)
             self.settings['year_from'], self.settings['year_to'] = st.select_slider("Years", range(2001,2020),[2001,2002])
             
         show_filter()
-        self.generate_report(self.data_frames, self.settings['stations'], range(self.settings['year_from'], self.settings['year_to'] + 1))            
-
+        self.generate_report(self.df_waterlevels, self.settings['stations'], range(self.settings['year_from'], self.settings['year_to'] + 1))            
 
 
     def plot_time_series(self,df, year):    
@@ -120,14 +119,12 @@ class App:
         html_file.close()
 
 
-    def generate_report(self, data_frames, stations, years):
+    def generate_report(self, df_wl, stations, years):
         def _create_html_file():
             for station in stations:
                 for year in years:
-                    df = data_frames[station]
-                    df['year'] = pd.DatetimeIndex(df['date']).year 
+                    df_filtered = df_wl[(df_wl['CASING_ID']==station) & (df_wl['year']==year)]
                     #  filter for required year
-                    df_filtered = df[df['year'] == year].copy()
                     df_filtered['month'] = pd.DatetimeIndex(df_filtered['date']).month
                     df_stat = self.get_monthly_stat_df(df_filtered)
                     if len(df_filtered) > 0:

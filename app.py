@@ -12,14 +12,23 @@ import pgmn_report_generator
 import pgmn_explorer
 import pgmn_info as info
 
-__version__ = '0.0.7' 
-__author__ = 'lukas calmbach'
-__author_email__ = 'lukas.calmbach@bs.ch'
-version_date = '2021-04-30'
-my_name = 'PGMN waterlevel data'
+
+
+__version__ = '0.0.8' 
+__author__ = 'Lukas Calmbach'
+__author_email__ = 'lcalmbach@gmail.com'
+VERSION_DATE = '2021-05-13'
+my_name = 'PGMN waterlevels'
 my_kuerzel = "PWD"
+GIT_REPO = 'https://github.com/lcalmbach/pgmn-report-generator'
 conn = {}
 config = {} # dictionary mit allen Konfigurationseinträgen
+APP_INFO = f"""<div style="background-color:powderblue; padding: 10px;border-radius: 15px;">
+    <small>App created by <a href="mailto:{__author_email__}">{__author__}</a><br>
+    version: {__version__} ({VERSION_DATE})<br>
+    <a href="{GIT_REPO}">git-repo</a>
+    """
+
 MENU_DIC = {info: 'Info', pgmn_metadata: 'Metadata on wells', pgmn_explorer: 'Explore water level data', pgmn_report_generator: 'Generate pdf reports'}
 
 BASE_DATA = os.path.join(os.getcwd(), 'static','data')
@@ -34,7 +43,7 @@ STATION_FILE = os.path.join(BASE_DATA, 'PGMN_WELLS_NAD83.csv')
 def get_data():
     def get_station_data():
         df = pd.read_csv(STATION_FILE, sep=';')
-        df['location_id'] = df['PGMN_WELL'].str[3:8]
+        df['location_id'] = pd.to_numeric(df['PGMN_WELL'].str[3:8])
         pd.to_numeric(df['location_id'])        
         return df
 
@@ -57,6 +66,7 @@ def get_data():
         df['mid_week_date'] = df['mid_week_date'].dt.date 
         df['year'] = df['date'].dt.year    
         df['month'] = df['date'].dt.month
+        df['location_id'] = pd.to_numeric(df['location_id'])  
         return df
 
     def get_wl_stations(df_stations:pd.DataFrame, df_wl:pd.DataFrame)-> pd.DataFrame:
@@ -65,7 +75,7 @@ def get_data():
         return df
 
     def get_precipitation_stations(df_stations:pd.DataFrame, df_precipitation:pd.DataFrame)-> pd.DataFrame:
-        lst_precipitation_stations = list(df_precipitation['LocationWell'].unique())
+        lst_precipitation_stations = list(df_precipitation['location_id'].unique())
         df = df_stations[ df_stations['location_id'].isin(lst_precipitation_stations)]
         return df
 
@@ -79,13 +89,18 @@ def get_data():
     
 
 def main():
+    st.set_page_config(
+    page_title=my_name,
+    page_icon="🌍",
+    layout="wide",
+    initial_sidebar_state="expanded")
     st.sidebar.markdown("### 🌍 PGMN water levels")
     df_stations, df_waterlevels, df_precipitation, df_wl_stations, df_precipitation_stations = get_data()
     my_app = st.sidebar.selectbox("Application", options=list(MENU_DIC.keys()),
         format_func=lambda x: MENU_DIC[x])
     app = my_app.App(df_stations, df_waterlevels, df_precipitation, df_wl_stations, df_precipitation_stations)
     app.show_menu()
-
+    st.sidebar.markdown(APP_INFO, unsafe_allow_html=True)
 if __name__ == "__main__":
     main()
 

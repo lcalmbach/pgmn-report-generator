@@ -2,8 +2,12 @@ from __future__ import print_function
 import pandas as pd
 import streamlit as st
 import altair as alt
+from datetime import date
 
 import tools
+
+current_year = date.today().year
+first_year = 2001
 
 class App:
     def __init__(self, df_stations, df_waterlevels, df_precipitation, df_wl_stations, df_precipitation_stations):
@@ -14,8 +18,8 @@ class App:
         self.df_precipitation_stations = df_precipitation_stations
 
         self.settings = {}
-        self.lst_conservation_authorities = ['<all>'] + list(df_stations['CONS_AUTHO'].unique())
-        self.lst_aquifer = ['<all>'] + list(df_stations['AQUIFER_TY'].unique())
+        self.lst_conservation_authorities = list(df_stations['CONS_AUTHO'].unique())
+        self.lst_aquifer = list(df_stations['AQUIFER_TY'].unique())
         self.stations = []
     
     def show_menu(self):
@@ -73,7 +77,7 @@ class App:
             lst_stations = get_stations()
             default = [lst_stations[0]]
             self.settings['stations'] = st.sidebar.multiselect("🎯 Station", lst_stations, default)
-            self.settings['year_from'], self.settings['year_to'] = st.sidebar.select_slider("Years", range(2001,2020),[2001,2002])
+            self.settings['year_from'], self.settings['year_to'] = st.sidebar.select_slider("Years", range(first_year,current_year-1),[current_year-7,current_year-2])
             self.settings['group_by_year'] = st.sidebar.checkbox("Group plots by year")
             self.settings['width'] = st.sidebar.number_input('Plot width (px)', value=800,min_value=100,max_value=10000)
             self.settings['height']= st.sidebar.number_input('Plot height (px)', value=300,min_value=100,max_value=10000)

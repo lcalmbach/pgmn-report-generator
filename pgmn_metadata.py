@@ -23,8 +23,8 @@ class App:
         self.df_precipitation_stations = df_precipitation_stations
 
         self.settings = {}
-        self.lst_conservation_authorities = ['<all>'] + list(df_stations['CONS_AUTHO'].unique())
-        self.lst_aquifer = ['<all>'] + list(df_stations['AQUIFER_TY'].unique())
+        self.lst_conservation_authorities = list(df_stations['CONS_AUTHO'].unique())
+        self.lst_aquifer = list(df_stations['AQUIFER_TY'].unique())
         self.stations = []
         self.PLOTS = ['timeseries', 'bartchart ', 'map']
         self.AGGREGATE_TIME = ['month','year']
@@ -32,8 +32,8 @@ class App:
     
     def show_menu(self):
         def get_wl_stats(df):
-            _df = self.df_waterlevels[['CASING_ID','year','wl_elev']]
-            stat_df = _df.groupby('CASING_ID').agg(
+            _df = self.df_waterlevels[['CASING_ID','location_id','year','wl_elev']]
+            stat_df = _df.groupby(['CASING_ID','location_id']).agg(
                 first_year=pd.NamedAgg(column="year", aggfunc="min"),
                 last_year=pd.NamedAgg(column="year", aggfunc="max"),
                 wl_elev_min=pd.NamedAgg(column="wl_elev", aggfunc="min"),
@@ -47,10 +47,11 @@ class App:
 
         def get_precipitation_stats():
             stat_df = pd.DataFrame()
-            _base_df = self.df_precipitation.groupby(['LocationWell', 'year']).agg(
+            _base_df = self.df_precipitation.groupby(['LocationWell', 'location_id', 'year']).agg(
                 prec=pd.NamedAgg(column="AccumulationFinal", aggfunc="sum"),
             ).reset_index()
-            stat_df = _base_df.groupby('LocationWell').agg(
+
+            stat_df = _base_df.groupby(['LocationWell', 'location_id']).agg(
                 first_year=pd.NamedAgg(column="year", aggfunc="min"),
                 last_year=pd.NamedAgg(column="year", aggfunc="max"),
                 min=pd.NamedAgg(column="prec", aggfunc="min"),
@@ -64,30 +65,34 @@ class App:
 
         def get_stations():
             df =  self.df_stations
-            if self.settings['cons_authorities'] != ['<all>']:
+            if len(self.settings['cons_authorities']) > 0:
                 filter = df['CONS_AUTHO'].isin(self.settings['cons_authorities']) 
                 df =  self.df_stations[filter]
             
-            if self.settings['aquifer_types'] != ['<all>']:
+            if len(self.settings['aquifer_types']):
                 filter = df['AQUIFER_TY'].isin(self.settings['aquifer_types'])
                 df =  df[filter]
             
+            lst_stations = list(pd.to_numeric(df['location_id'].unique()))
             field_list = ['PGMN_WELL','CONS_AUTHO','COUNTY','TOWNSHIP','LOT','CONCESSION','AQUIFER_LI', 'WELL_DEPTH','WEL_PIEZOM','SCREEN_HOL','LATITUDE','LONGITUDE','ELEV_GROUN']
             df = df[field_list]
-            return df
+            return df, lst_stations
 
         def show_filter():
-            self.settings['cons_authorities'] = st.sidebar.multiselect("Conservation authority", self.lst_conservation_authorities, ['<all>'])
-            self.settings['aquifer_types'] = st.sidebar.multiselect("Aquifer types", self.lst_aquifer, ['<all>'])
+            self.settings['cons_authorities'] = st.sidebar.multiselect("🔎 Conservation authority", self.lst_conservation_authorities)
+            self.settings['aquifer_types'] = st.sidebar.multiselect("🔎 Aquifer types", self.lst_aquifer)
         
         show_filter()
-        stations = get_stations()
+        stations, lst_stations = get_stations()
         with st.beta_expander(f'All Stations ({len(stations)})'):
             AgGrid(stations)
         stats = get_wl_stats(stations)
+        stats = stats[stats['location_id'].isin(lst_stations)]
         with st.beta_expander(f"Water levels statistics ({ len(pd.unique(stats['CASING_ID'])) } stations)"):
             AgGrid(stats)
         stats = get_precipitation_stats()
+        stats = stats[stats['location_id'].isin(lst_stations)]
+        
         with st.beta_expander(f"Precipitation statistics ({ len(pd.unique(stats['LocationWell'])) } stations)"):
             stats['min'] = stats['min'].apply('{:.2f}'.format)
             stats['max'] = stats['max'].apply('{:.2f}'.format)

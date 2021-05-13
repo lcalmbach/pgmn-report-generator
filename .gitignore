@@ -1,6 +1,7 @@
 /__pycache__
 /env
 /archive
+/static/pdf/*.pdf
 /static/html/*.html
 /static/images/*.png
 test*.*
