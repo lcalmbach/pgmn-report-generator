@@ -91,10 +91,12 @@ class App:
     def plot_time_series(self, df_wl, df_prec, config):
         min_year = config['year_from']
         max_year = config['year_to'] + 1
-        min_y= df_wl['wl_elev'].min()
+        filter = df_wl['wl_elev'].notna() # make sure there are no Null values 
+        min_y= df_wl[filter]['wl_elev'].min()
         max_y= df_wl['wl_elev'].max()
         min_y= tools.truncate(min_y, 0) 
-        max_y= tools.truncate(max_y+ 1, 0) 
+        
+        max_y= tools.truncate(max_y + 1, 0) 
 
         waterlevels = alt.Chart(df_wl).mark_line(clip=True).encode(
             alt.X('date:T',
