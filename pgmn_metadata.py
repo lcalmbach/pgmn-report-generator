@@ -3,6 +3,7 @@ import pandas as pd
 import streamlit as st
 #import tools
 import numpy as np
+from st_aggrid import AgGrid
 
 LATITUDE_COLUMN = 'LATITUDE'
 LONGITUDE_COLUMN = 'LONGITUDE'
@@ -55,6 +56,7 @@ class App:
                 min=pd.NamedAgg(column="prec", aggfunc="min"),
                 max=pd.NamedAgg(column="prec", aggfunc="max"),
                 mean=pd.NamedAgg(column="prec", aggfunc="mean"),
+                std=pd.NamedAgg(column="prec", aggfunc="std"),
             )
 
             stat_df = stat_df.reset_index()
@@ -81,25 +83,17 @@ class App:
         show_filter()
         stations = get_stations()
         with st.beta_expander(f'All Stations ({len(stations)})'):
-            st.write(stations)
+            AgGrid(stations)
         stats = get_wl_stats(stations)
         with st.beta_expander(f"Water levels statistics ({ len(pd.unique(stats['CASING_ID'])) } stations)"):
-            stats = stats.style.format({
-                'wl_elev_min': '{:,.2f}'.format,
-                'wl_elev_max': '{:,.2f}'.format,
-                'wl_elev_mean': '{:,.2f}'.format,
-                'wl_elev_std': '{:,.2f}'.format
-            })
-            st.write(stats)
+            AgGrid(stats)
         stats = get_precipitation_stats()
         with st.beta_expander(f"Precipitation statistics ({ len(pd.unique(stats['LocationWell'])) } stations)"):
-            stat_df = stats.style.format({
-                'min': '{:,.2f}'.format,
-                'max': '{:,.2f}'.format,
-                'mean': '{:,.2f}'.format,
-                'std': '{:,.2f}'.format
-            })
-            st.write(stats)
+            stats['min'] = stats['min'].apply('{:.2f}'.format)
+            stats['max'] = stats['max'].apply('{:.2f}'.format)
+            stats['mean'] = stats['mean'].apply('{:.2f}'.format)
+            stats['std'] = stats['std'].apply('{:.2f}'.format)
+            AgGrid(stats)
 
         # self.plot_map('stations', stations, 'ScatterplotLayer', 'WELL_DEPTH')
 
