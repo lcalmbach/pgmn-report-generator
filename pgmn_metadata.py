@@ -1,18 +1,12 @@
 
 import pandas as pd
 import streamlit as st
-#import tools
 import numpy as np
+import pydeck as pdk
 from st_aggrid import AgGrid
 
-LATITUDE_COLUMN = 'LATITUDE'
-LONGITUDE_COLUMN = 'LONGITUDE'
-MAP_LEGEND_SYMBOL_SIZE: int = 10
-MAPBOX_STYLE: str = "mapbox://styles/mapbox/light-v10"
-GRADIENT: str = 'blue-green'
-TOOLTIP_FONTSIZE = 'x-small'
-TOOLTIP_BACKCOLOR = 'white'
-TOOLTIP_FORECOLOR = 'black'
+import const as cn
+import tools
 
 class App:
     def __init__(self, df_stations, df_waterlevels, df_precipitation, df_wl_stations, df_precipitation_stations):
@@ -29,7 +23,7 @@ class App:
         self.PLOTS = ['timeseries', 'bartchart ', 'map']
         self.AGGREGATE_TIME = ['month','year']
 
-    
+
     def show_menu(self):
         def get_wl_stats(df):
             _df = self.df_waterlevels[['CASING_ID','location_id','year','wl_elev']]
@@ -77,30 +71,38 @@ class App:
             field_list = ['PGMN_WELL','CONS_AUTHO','COUNTY','TOWNSHIP','LOT','CONCESSION','AQUIFER_LI', 'WELL_DEPTH','WEL_PIEZOM','SCREEN_HOL','LATITUDE','LONGITUDE','ELEV_GROUN']
             df = df[field_list]
             return df, lst_stations
+        
+        def get_map_data(map_parameter, lst_filtered_stations):
+            if map_parameter.lower() == 'wells by aquifer type':
+                fields = ['PGMN_WELL','location_id','LONGITUDE','LATITUDE','AQUIFER_TY']
+                df_locations = self.df_stations[fields]
+                df_locations = df_locations[df_locations['location_id'].isin(lst_filtered_stations)]
+                value_par = None
+            return df_locations, value_par
 
         def show_filter():
             self.settings['cons_authorities'] = st.sidebar.multiselect("🔎 Conservation authority", self.lst_conservation_authorities)
             self.settings['aquifer_types'] = st.sidebar.multiselect("🔎 Aquifer types", self.lst_aquifer)
         
         show_filter()
+
         stations, lst_stations = get_stations()
         with st.beta_expander(f'All Stations ({len(stations)})'):
             AgGrid(stations)
+
         stats = get_wl_stats(stations)
         stats = stats[stats['location_id'].isin(lst_stations)]
         with st.beta_expander(f"Water levels statistics ({ len(pd.unique(stats['CASING_ID'])) } stations)"):
             AgGrid(stats)
+
         stats = get_precipitation_stats()
         stats = stats[stats['location_id'].isin(lst_stations)]
-        
         with st.beta_expander(f"Precipitation statistics ({ len(pd.unique(stats['LocationWell'])) } stations)"):
             stats['min'] = stats['min'].apply('{:.2f}'.format)
             stats['max'] = stats['max'].apply('{:.2f}'.format)
             stats['mean'] = stats['mean'].apply('{:.2f}'.format)
             stats['std'] = stats['std'].apply('{:.2f}'.format)
             AgGrid(stats)
-
-        # self.plot_map('stations', stations, 'ScatterplotLayer', 'WELL_DEPTH')
 
     
 

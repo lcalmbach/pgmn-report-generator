@@ -2,8 +2,6 @@ from __future__ import print_function
 import pandas as pd
 import streamlit as st
 import os
-import glob
-import datetime
 
 from streamlit.caching import get_cache_path
 
@@ -11,10 +9,10 @@ import pgmn_metadata
 import pgmn_report_generator
 import pgmn_explorer
 import pgmn_info as info
+import pgmn_maps as maps
 
 
-
-__version__ = '0.0.9' 
+__version__ = '0.0.10' 
 __author__ = 'Lukas Calmbach'
 __author_email__ = 'lcalmbach@gmail.com'
 VERSION_DATE = '2021-05-13'
@@ -29,7 +27,7 @@ APP_INFO = f"""<div style="background-color:powderblue; padding: 10px;border-rad
     <a href="{GIT_REPO}">git-repo</a>
     """
 
-MENU_DIC = {info: 'Info', pgmn_metadata: 'Metadata on wells', pgmn_explorer: 'Explore water level data', pgmn_report_generator: 'Generate pdf reports'}
+MENU_DIC = {info: 'Info', pgmn_metadata: 'Metadata on wells', maps: 'Maps', pgmn_explorer: 'Time series', pgmn_report_generator: 'Generate pdf reports'}
 
 BASE_DATA = os.path.join(os.getcwd(), 'static','data')
 BASE_PRECIPITATION = os.path.join(os.getcwd(), 'static','data', 'precipitation')
