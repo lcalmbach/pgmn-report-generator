@@ -21,3 +21,18 @@ COLOR_SCHEMAS = {
         'LightGray': {'hex': '#D3D3D3', 'r': 211, 'g': 211, 'b': 211}
     }
 }
+
+MONTH_DICT =  {
+    1: 'jan',
+    2: 'feb',
+    3: 'mar',
+    4: 'apr',
+    5: 'mai',
+    6: 'jun',
+    7: 'jul',
+    8: 'aug',
+    9: 'sep',
+    10: 'oct',
+    11: 'nov',
+    12: 'dec',
+}

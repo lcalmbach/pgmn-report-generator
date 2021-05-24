@@ -7,15 +7,16 @@ from streamlit.caching import get_cache_path
 
 import pgmn_metadata
 import pgmn_report_generator
-import pgmn_explorer
+import pgmn_wl_explorer
+import pgmn_prec_explorer
 import pgmn_info as info
 import pgmn_maps as maps
 
 
-__version__ = '0.0.10' 
+__version__ = '0.0.11' 
 __author__ = 'Lukas Calmbach'
 __author_email__ = 'lcalmbach@gmail.com'
-VERSION_DATE = '2021-05-13'
+VERSION_DATE = '2021-05-20'
 my_name = 'PGMN waterlevels'
 my_kuerzel = "PWD"
 GIT_REPO = 'https://github.com/lcalmbach/pgmn-report-generator'
@@ -27,7 +28,12 @@ APP_INFO = f"""<div style="background-color:powderblue; padding: 10px;border-rad
     <a href="{GIT_REPO}">git-repo</a>
     """
 
-MENU_DIC = {info: 'Info', pgmn_metadata: 'Metadata on wells', maps: 'Maps', pgmn_explorer: 'Time series', pgmn_report_generator: 'Generate pdf reports'}
+MENU_DIC = {info: 'Info', 
+    pgmn_metadata: 'Metadata on wells', 
+    maps: 'Maps', 
+    pgmn_wl_explorer: 'Explore water levels', 
+    pgmn_prec_explorer: 'Explore precipitation data', 
+    pgmn_report_generator: 'Generate pdf reports'}
 
 BASE_DATA = os.path.join(os.getcwd(), 'static','data')
 BASE_PRECIPITATION = os.path.join(os.getcwd(), 'static','data', 'precipitation')

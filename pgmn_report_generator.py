@@ -45,7 +45,7 @@ class App:
             df =  self.df_stations
             if len(self.settings['cons_authorities']) > 0:
                 filter = df['CONS_AUTHO'].isin(self.settings['cons_authorities']) 
-                df =  self.df_station[filter]
+                df =  self.df_stations[filter]
             
             if len(self.settings['aquifer_types']) > 0:
                 filter = df['AQUIFER_TY'].isin(self.settings['aquifer_types'])
@@ -137,7 +137,7 @@ class App:
                         self.create_html_table(df_stat, station, year)
                         self.create_html_fig(station,year)
                     else:
-                        st.write(f'no data availale for this station in {year}')
+                        st.warning(f'no data available for this station in {year}')
 
         
         
@@ -202,8 +202,6 @@ class App:
                         source_code += html_file.read() 
                         # write the page break
                         source_code += '<p class="new-page"></p>'
-                    else:
-                        st.write(f'{file_name} not found')
 
             if platform.system() == "Windows":
                 pdfkit_config = pdfkit.configuration(wkhtmltopdf=os.environ.get('WKHTMLTOPDF_BINARY', WKHTMLTOPDF_WIN_PATH))

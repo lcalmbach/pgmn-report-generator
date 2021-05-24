@@ -15,27 +15,23 @@ class App:
         self.df_stations = df_stations
         self.df_waterlevels = df_waterlevels
         self.df_precipitation = df_precipitation
-        self.df_wl_stations = df_wl_stations
         self.df_precipitation_stations = df_precipitation_stations
 
         self.settings = {}
         self.lst_conservation_authorities = list(df_stations['CONS_AUTHO'].unique())
-        self.lst_aquifer = list(df_stations['AQUIFER_TY'].unique())
+        self.lst_conservation_authorities.sort()
         self.stations = []
     
     def show_menu(self):
-
         def get_stations():
             df =  self.df_stations
             if len(self.settings['cons_authorities']) > 0:
                 filter = df['CONS_AUTHO'].isin(self.settings['cons_authorities']) 
                 df =  self.df_stations[filter]
-            
-            if len(self.settings['aquifer_types']) > 0:
-                filter = df['AQUIFER_TY'].isin(self.settings['aquifer_types'])
-                df =  df[filter]
 
-            return list(df['PGMN_WELL'])
+            stations = list(df['PGMN_WELL'])
+            stations.sort()
+            return stations
 
         def show_plot():            
             config={}
@@ -43,7 +39,7 @@ class App:
             config['height'] = self.settings['height']
             config['year_from'] = self.settings['year_from']
             config['year_to'] = self.settings['year_to']
-            config['rolling_avg_int'] = 0 # todo: self.settings['rolling_avg_int']
+
             for station in self.settings['stations']:
                 config['title'] = f"{station} ({self.settings['year_from']} - {self.settings['year_to']})"
                 df_wl = self.df_waterlevels[self.df_waterlevels['CASING_ID'] == station] 
@@ -74,8 +70,6 @@ class App:
         def show_filter():
             default=[self.lst_conservation_authorities[0]]
             self.settings['cons_authorities'] = st.sidebar.multiselect("🔎 Conservation authority", self.lst_conservation_authorities, [])
-            default=[self.lst_aquifer[0]]
-            self.settings['aquifer_types'] = st.sidebar.multiselect("🔎 Aquifer types", self.lst_aquifer, [])
             lst_stations = get_stations()
             default = [lst_stations[0]]
             self.settings['stations'] = st.sidebar.multiselect("🎯 Station", lst_stations, default)
@@ -111,7 +105,8 @@ class App:
             ),
             tooltip=['CASING_ID', 'date', 'wl_elev']
         )
-        if config['rolling_avg_int'] > 0:
+        #todo: add rolling average
+        if 1==2: #config['rolling_avg_int'] > 0:
             rolling_avg = alt.Chart(df_wl).mark_line(
                     color='red',
                     size=2
@@ -138,7 +133,7 @@ class App:
         )
 
 
-        if config['rolling_avg_int'] > 0:
+        if 1==2: #config['rolling_avg_int'] > 0:
             fig = (waterlevels + rolling_avg)
         elif len(df_prec) > 0:
             fig = alt.layer(waterlevels, precipitation).resolve_scale(y='independent')
